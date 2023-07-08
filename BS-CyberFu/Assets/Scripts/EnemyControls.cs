@@ -49,7 +49,7 @@ public class EnemyControls : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Attack();
     }
 
     void FixedUpdate(){
@@ -60,24 +60,32 @@ public class EnemyControls : MonoBehaviour
         //If the enemy is not following the target...
         if(!isFollowingTarget){
             //"isFollowingTarget" is true
-
+            rigidbodyEnemy.isKinematic = true;
             return;
         }
 
         //If the enemy is too far away to attack the target...
 
         if(Vector3.Distance(transform.position, target.position) >= attackingDistance){
+            rigidbodyEnemy.isKinematic = false;
             //direction equals to target's position minus enemy's position
             direction = target.position - transform.position;
             //y aixs value equals to 0
             direction.y = 0;
             //enemy rotation to focus on the target
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 20);
-            // If enemy's distance is close to attack the player
-            else if(Vector3.Distance(transfrom.position, target.position) <= attackingDistance){
-                
-            }
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 100);
         }
+        // If enemy's distance is close to attack the player
+        else if(Vector3.Distance(transform.position, target.position) <= attackingDistance){
+            rigidbodyEnemy.isKinematic = false;
+            //Keeps the enemy from moving within its place
+            rigidbodyEnemy.velocity = Vector3.zero;
+            //animation "Walk" is set to false
+            animatorEnemy.SetBool("Walk", false);
+            isFollowingTarget = false;
+            isAttackingTarget = true;
+            }
+    
 
 
         
@@ -86,6 +94,47 @@ public class EnemyControls : MonoBehaviour
             //move the enemy by the velocity of speed 
             rigidbodyEnemy.velocity = transform.forward * speed;
             animatorEnemy.SetBool("Walk", true);
+        }
+    }
+    
+    void Attack(){
+        if (!isAttackingTarget){
+            return;
+        }
+        currentAttackingTime += Time.deltaTime;
+        if(currentAttackingTime > maxAttackingTime){
+            currentAttackingTime = 0f;
+            EnemyAttack(Random.Range(1,7));
+        }
+
+        if(Vector3.Distance(transform.position, target.position) > attackingDistance + chasingPlayer){
+            isAttackingTarget = false;
+            isFollowingTarget = true;
+        }
+    }
+    public void EnemyAttack(int attack){
+        if(attack == 1){
+            animatorEnemy.SetTrigger("Attack1");
+        }
+
+        if(attack ==2){
+            animatorEnemy.SetTrigger("Attack");
+        }
+
+        if(attack == 3 ){
+            animatorEnemy.SetTrigger("Attack3");
+        }
+
+        if(attack == 4){
+            animatorEnemy.SetTrigger("Attack4");
+        }
+
+        if(attack == 5){
+            animatorEnemy.SetTrigger("Attack5");
+        }
+
+        if(attack == 6){
+            animatorEnemy.SetTrigger("Attack6");
         }
     }
 }
